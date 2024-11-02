@@ -1,0 +1,8 @@
+[package]
+name = "Financial-tracker"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rusqlite = { version = "0.32.0", features = ["bundled"] }
+dirs = "4.0.0"
