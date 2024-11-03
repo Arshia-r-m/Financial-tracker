@@ -1,7 +1,11 @@
 [package]
-name = "Financial-tracker"
-version = "0.1.0"
+name = "fin"
+version = "1.0.0"
 edition = "2021"
+authors = ["Arshia-r-m"]
+description = "A command-line tool for managing accounts and transactions."
+license = "MIT"
+repository = "https://github.com/Arshia-r-m/Financial-tracker"
 
 [dependencies]
 rusqlite = { version = "0.32.0", features = ["bundled"] }

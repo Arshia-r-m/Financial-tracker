@@ -7,33 +7,22 @@
 - **Add Accounts**: Create accounts with initial balances.
 - **Add Transactions**: Record transactions with descriptions, amounts, and dates.
 - **Database Management**: Stores data securely using SQLite, automatically creating necessary directories and files.
-- **Command-line Interface**: Interact with the application using intuitive CLI commands powered by `clap`.
-
-## Requirements
-
-- **Rust**: Ensure you have Rust installed. [Install Rust](https://www.rust-lang.org/tools/install)
-- **SQLite**: Required for database functionality. Rust's `rusqlite` crate handles SQLite interactions.
+- **Command-line Interface**: User-friendly CLI powered by `clap` for easy command handling.
 
 ## Installation
 
-1. **Clone the Repository**:
+To install **Financial Tracker**, first clone the repository:
 
-   ```bash
-   git clone https://github.com/Arshia-r-m/Financial-tracker.git
-   cd Financial-tracker
-   ```
+```bash
+git clone https://github.com/Arshia-r-m/Financial-tracker.git
+cd Financial-tracker
+```
 
-2. **Build the Project**:
+Then, install the application locally using Cargo:
 
-   ```bash
-   cargo build --release
-   ```
-
-3. **Run the Application**:
-
-   ```bash
-   cargo run -- <command>
-   ```
+```bash
+cargo install --path .
+```
 
 ## Usage
 
@@ -42,7 +31,7 @@
 To add a new account, use the `add_account` command with the account's name and optional initial balance:
 
 ```bash
-cargo run -- add_account --name "Account Name" --balance 1000
+fin add_account --name "Account Name" --balance 1000
 ```
 
 - **`--name`**: The name of the account (required).
@@ -53,21 +42,21 @@ cargo run -- add_account --name "Account Name" --balance 1000
 To record a transaction, use the `add_transaction` command with the account name, amount, date, and optional description:
 
 ```bash
-cargo run -- add_transaction --account_name "Account Name" --amount -200 --date "2023-11-01" --description "Grocery shopping"
+fin add_transaction --account_name "Account Name" --amount -200 --date "2023-11-01" --description "Grocery shopping"
 ```
 
 - **`--account_name`**: The name of the account for the transaction (required).
-- **`--amount`**: The amount for the transaction. Use a negative value for withdrawals.
+- **`--amount`**: The transaction amount. Use a negative value for withdrawals.
 - **`--date`**: The date of the transaction in `YYYY-MM-DD` format (required).
 - **`--description`**: A description of the transaction (optional).
 
 ### Command-line Options
 
-- Use `--help` for a list of available commands and options:
+For a list of available commands and options, use:
 
-  ```bash
-  cargo run -- --help
-  ```
+```bash
+fin --help
+```
 
 ## Project Structure
 
