@@ -1,6 +1,7 @@
 use dirs::home_dir;
 use rusqlite::{params, Connection, Result};
 use std::fs;
+use clap::{Arg, Command};
 
 #[derive(Debug)]
 struct Account {
@@ -13,26 +14,179 @@ struct Account {
 struct Transaction {
     id: Option<i32>,
     account_name: String,
-    amount: u32,
+    amount: i32,
     date: String,
     description: Option<String>,
 }
 
 fn main() {
-    let conn = database_connection().expect("Failed to connect to database");
+    let matches = Command::new("Finance Tracker")
+        .version("1.0")
+        .author("Arshia")
+        .about("Tracks accounts and transactions")
+        .subcommand(
+            Command::new("add-account")
+                .about("Add a new account")
+                .arg(
+                    Arg::new("name")
+                        .short('n')
+                        .long("name")
+                        .value_name("NAME")
+                        .help("The name of the account")
+                        .required(true),
+                )
+                .arg(
+                    Arg::new("balance")
+                        .short('b')
+                        .long("balance")
+                        .value_name("BALANCE")
+                        .help("Initial balance of the account"),
+                ),
+        )
+        .subcommand(Command::new("list-accounts").about("List all accounts"))
+        .subcommand(
+            Command::new( "remove-account")
+            .about("Remove an account")
+            .arg(
+                Arg::new("id")
+                .short('i')
+                .long("id")
+                .value_name("ID")
+                .help("The id of the account to remove")
+                .required(true),
+            ),
+            )
+        .subcommand(
+            Command::new("add-transaction")
+                .about("Add a new transaction")
+                .arg(
+                    Arg::new("account-name")
+                        .short('a')
+                        .long("account-name")
+                        .value_name("ACCOUNT_NAME")
+                        .help("The name of the account for the transaction")
+                        .required(true),
+                )
+                .arg(
+                    Arg::new("amount")
+                        .short('m')
+                        .long("amount")
+                        .value_name("AMOUNT")
+                        .help("The transaction amount")
+                        .required(true),
+                )
+                .arg(
+                    Arg::new("date")
+                        .short('d')
+                        .long("date")
+                        .value_name("DATE")
+                        .help("The date of the transaction")
+                        .required(true),
+                )
+                .arg(
+                    Arg::new("description")
+                        .short('s')
+                        .long("description")
+                        .value_name("DESCRIPTION")
+                        .help("A description of the transaction"),
+                )
+                .arg(
+                    Arg::new("type")
+                        .short('t')
+                        .long("type")
+                        .value_name("TYPE")
+                        .help("The type of the transaction")
+                        .value_parser(["income", "expense"])
+                        .required(true),
+                ),
+        )
+        .subcommand(Command::new("list-expenses").about("List all expenses"))
+        .subcommand(
+            Command::new("remove-expense")
+            .about("Remove an expense")
+            .arg(
+                Arg::new("id")
+                .short('i')
+                .long("id")
+                .value_name("ID")
+                .help("The id of the expense to remove")
+                .required(true)
+            )
+        )
+        .subcommand(Command::new("list-incomes").about("List all incomes"))
+        .subcommand(
+            Command::new("remove-income")
+            .about("Remove an income")
+            .arg(
+                Arg::new("id")
+                .short('i')
+                .long("id")
+                .value_name("ID")
+                .help("The id of the expense to remove")
+                .required(true)
+            )
+        )
+        .get_matches();
 
-    let account = Account {
-        id: Some(1),
-        name: "Bank".to_string(),
-        balance: Some(100),
-    };
-    let transaction = Transaction {
-        id: Some(1),
-        account_name: "Bank".to_string(),
-        amount: 10,
-        date: "2021-01-01".to_string(),
-        description: Some("Bought a book".to_string()),
-    };
+    let conn = database_connection().expect("Failed to connect to database");
+    
+    match matches.subcommand() {
+        Some(("add-account", sub_m)) => {
+            let name = sub_m.get_one::<String>("name").expect("name is required");
+            let balance = sub_m.get_one::<String>("balance").unwrap_or(&"0".to_string()).parse::<u32>().unwrap();
+
+            let account = Account {
+                id: None,
+                name: name.clone(),
+                balance: Some(balance),
+            };
+            let _ = add_account(&conn, account);
+        }
+        Some(("list-accounts", _)) => {
+            let _ = list_accounts(&conn);
+        }
+        Some(("remove-account", sub_m)) => {
+            let id = sub_m.get_one::<String>("id").unwrap().parse::<i32>().unwrap();
+            let _ = remove_account(&conn, id);
+        }
+        Some(("add-transaction", sub_m)) => {
+            let account_name = sub_m.get_one::<String>("account-name").expect("account-name is required");
+            let amount = sub_m.get_one::<String>("amount").expect("amount is required").parse::<i32>().unwrap();
+            let date = sub_m.get_one::<String>("date").expect("date is required").to_string();
+            let description = sub_m.get_one::<String>("description").map(|s| s.to_string());
+
+            let transaction = Transaction {
+                id: None,
+                account_name: account_name.clone(),
+                amount,
+                date,
+                description,
+            };
+            let transaction_type = sub_m.get_one::<String>("type").expect("type is required");
+            if transaction_type == "income" {
+                let _ = add_income(&conn, transaction);
+            } else if transaction_type == "expense" {
+                let _ = add_expense(&conn, transaction);
+            } else {
+                println!("Invalid transaction type");
+            }
+        }
+        Some(("list-expenses", _)) => {
+            let _ = list_expenses(&conn);
+        }
+        Some(("remove-expense", sub_m)) => {
+            let id = sub_m.get_one::<String>("id").unwrap().parse::<i32>().unwrap();
+            let _ = remove_expense(&conn, id);
+        }
+        Some(("list-incomes", _)) => {
+            let _ = list_incomes(&conn);
+        }
+        Some(("remove-income", sub_m)) => {
+            let id = sub_m.get_one::<String>("id").unwrap().parse::<i32>().unwrap();
+            let _ = remove_income(&conn, &id);
+        }
+        _ => println!("Use --help for more information."),
+    }
 }
 
 fn database_connection() -> Result<Connection> {
@@ -162,9 +316,9 @@ fn add_account(conn: &Connection, account: Account) -> Result<()> {
     Ok(())
 }
 
-fn remove_account(conn: &Connection, account: Account) -> Result<()> {
-    println!("Removing account: {:?}", account.id.unwrap());
-    let result = conn.execute("DELETE FROM accounts WHERE id = ?1", params![1]);
+fn remove_account(conn: &Connection, account: i32) -> Result<()> {
+    println!("Removing account: {}", &account);
+    let result = conn.execute("DELETE FROM accounts WHERE id = ?1", params![account]);
     match result {
         Ok(_) => println!("Account removed successfully."),
         Err(e) => println!("Failed to remove account: {:?}", e),
@@ -223,9 +377,9 @@ fn add_expense(conn: &Connection, expense: Transaction) -> Result<()> {
     Ok(())
 }
 
-fn remove_expense(conn: &Connection, expense: Transaction) -> Result<()> {
-    println!("Removing expense: {:?}", expense.id.unwrap());
-    let result = conn.execute("DELETE FROM expenses WHERE id = ?1", params![1]);
+fn remove_expense(conn: &Connection, expense: i32) -> Result<()> {
+    println!("Removing expense: {}", &expense);
+    let result = conn.execute("DELETE FROM expenses WHERE id = ?1", params![expense]);
     match result {
         Ok(_) => println!("Expense removed successfully."),
         Err(e) => println!("Failed to remove expense: {:?}", e),
@@ -284,9 +438,9 @@ fn add_income(conn: &Connection, income: Transaction) -> Result<()> {
     Ok(())
 }   
 
-fn remove_income(conn: &Connection, income: Transaction) -> Result<()> {
-    println!("Removing income: {:?}", income.id.unwrap());
-    let result = conn.execute("DELETE FROM incomes WHERE id = ?1", params![1]);
+fn remove_income(conn: &Connection, income: &i32) -> Result<()> {
+    println!("Removing income: {}", income);
+    let result = conn.execute("DELETE FROM incomes WHERE id = ?1", params![income]);
     match result {
         Ok(_) => println!("Income removed successfully."),
         Err(e) => println!("Failed to remove income: {:?}", e),
