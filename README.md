@@ -1,7 +1,3 @@
-Here's a `README.md` file for your **Financial Tracker** project:
-
----
-
 # Financial Tracker
 
 **Financial Tracker** is a command-line tool for managing accounts and tracking transactions. Built in Rust, this application uses SQLite for data storage, allowing users to add accounts, record transactions, and view account details. The application provides a simple interface to handle personal finances with basic operations like tracking balances and transaction history.
@@ -94,7 +90,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Contact
 
 For any questions or feedback, please contact [Arshia R. M.](https://github.com/Arshia-r-m).
-
----
-
-This `README` gives an overview of the project, its usage, and setup instructions.
