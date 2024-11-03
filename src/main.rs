@@ -7,14 +7,14 @@ use clap::{Arg, Command};
 struct Account {
     id: Option<i32>,
     name: String,
-    balance: Option<u32>,
+    balance: Option<f32>,
 }
 
 #[derive(Debug)]
 struct Transaction {
     id: Option<i32>,
     account_name: String,
-    amount: i32,
+    amount: f32,
     date: String,
     description: Option<String>,
 }
@@ -133,8 +133,7 @@ fn main() {
     match matches.subcommand() {
         Some(("add-account", sub_m)) => {
             let name = sub_m.get_one::<String>("name").expect("name is required");
-            let balance = sub_m.get_one::<String>("balance").unwrap_or(&"0".to_string()).parse::<u32>().unwrap();
-
+            let balance = sub_m.get_one::<String>("balance").unwrap_or(&"0".to_string()).parse::<f32>().unwrap();
             let account = Account {
                 id: None,
                 name: name.clone(),
@@ -151,7 +150,7 @@ fn main() {
         }
         Some(("add-transaction", sub_m)) => {
             let account_name = sub_m.get_one::<String>("account-name").expect("account-name is required");
-            let amount = sub_m.get_one::<String>("amount").expect("amount is required").parse::<i32>().unwrap();
+            let amount = sub_m.get_one::<String>("amount").expect("amount is required").parse::<f32>().unwrap();
             let date = sub_m.get_one::<String>("date").expect("date is required").to_string();
             let description = sub_m.get_one::<String>("description").map(|s| s.to_string());
 
@@ -200,7 +199,7 @@ fn database_connection() -> Result<Connection> {
         "CREATE TABLE IF NOT EXISTS accounts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name  TEXT NOT NULL UNIQUE,
-        balance INTEGER DEFAULT 0
+        balance REAL DEFAULT 0
         );",
         [],
     )?;
@@ -209,7 +208,7 @@ fn database_connection() -> Result<Connection> {
         "CREATE TABLE IF NOT EXISTS expenses (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         account_name TEXT NOT NULL,
-        amount INTEGER NOT NULL,
+        amount REAL NOT NULL,
         date TEXT NOT NULL,
         description TEXT,
         FOREIGN KEY (account_name) REFERENCES accounts (name) ON DELETE CASCADE
@@ -221,7 +220,7 @@ fn database_connection() -> Result<Connection> {
         "CREATE TABLE IF NOT EXISTS incomes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         account_name TEXT NOT NULL,
-        amount INTEGER NOT NULL,
+        amount REAL NOT NULL,
         date TEXT NOT NULL,
         description TEXT,
         FOREIGN KEY (account_name) REFERENCES accounts (name) ON DELETE CASCADE
