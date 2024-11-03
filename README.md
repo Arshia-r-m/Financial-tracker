@@ -9,6 +9,11 @@
 - **Database Management**: Stores data securely using SQLite, automatically creating necessary directories and files.
 - **Command-line Interface**: User-friendly CLI powered by `clap` for easy command handling.
 
+## Requirements
+
+Before you begin, ensure you have met the following requirements:
+- You have installed [Cargo](https://www.rust-lang.org/tools/install).
+
 ## Installation
 
 To install **Financial Tracker**, first clone the repository:
