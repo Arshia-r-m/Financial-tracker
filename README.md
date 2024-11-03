@@ -39,15 +39,16 @@ fin add_account --name "Account Name" --balance 1000
 
 ### Adding a Transaction
 
-To record a transaction, use the `add_transaction` command with the account name, amount, date, and optional description:
+To record a transaction, use the `add_transaction` command with the account name, amount, date, type, and optional description:
 
 ```bash
-fin add_transaction --account_name "Account Name" --amount -200 --date "2023-11-01" --description "Grocery shopping"
+fin add_transaction --account_name "Account Name" --amount 200 --date "2023-11-01" --type income --description "Grocery shopping"
 ```
 
 - **`--account_name`**: The name of the account for the transaction (required).
 - **`--amount`**: The transaction amount. Use a negative value for withdrawals.
 - **`--date`**: The date of the transaction in `YYYY-MM-DD` format (required).
+- **`--type`**: Transaction type, possible options are income or expense (required).
 - **`--description`**: A description of the transaction (optional).
 
 ### Command-line Options
