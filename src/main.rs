@@ -2,6 +2,7 @@ use dirs::home_dir;
 use rusqlite::{params, Connection, Result};
 use std::fs;
 use clap::{Arg, Command};
+use chrono::{prelude::*, NaiveDate};
 
 #[derive(Debug)]
 struct Account {
@@ -80,8 +81,7 @@ fn main() {
                         .short('d')
                         .long("date")
                         .value_name("DATE")
-                        .help("The date of the transaction")
-                        .required(true),
+                        .help("The date of the transaction"),
                 )
                 .arg(
                     Arg::new("description")
@@ -151,14 +151,19 @@ fn main() {
         Some(("add-transaction", sub_m)) => {
             let account_name = sub_m.get_one::<String>("account-name").expect("account-name is required");
             let amount = sub_m.get_one::<String>("amount").expect("amount is required").parse::<f32>().unwrap();
-            let date = sub_m.get_one::<String>("date").expect("date is required").to_string();
+            let mut date = sub_m.get_one::<String>("date").map(|s| s.to_string());
             let description = sub_m.get_one::<String>("description").map(|s| s.to_string());
-
+            if date==None {
+                date = Local::now().format("%d-%m-%Y").to_string().parse::<String>().ok();
+            }else if !validate_date(&date) {
+                println!("Invalid date format. Use dd-mm-yyyy");
+                return;
+            }
             let transaction = Transaction {
                 id: None,
                 account_name: account_name.clone(),
                 amount,
-                date,
+                date: date.unwrap(),
                 description,
             };
             let transaction_type = sub_m.get_one::<String>("type").expect("type is required");
@@ -445,4 +450,14 @@ fn remove_income(conn: &Connection, income: &i32) -> Result<()> {
         Err(e) => println!("Failed to remove income: {:?}", e),
     };
     Ok(())
+}
+
+//Validation functions
+
+fn validate_date(date: &Option<String>) -> bool {
+    let format = "%d-%m-%Y";
+    match NaiveDate::parse_from_str(date.as_deref().unwrap_or(""), format) {
+        Ok(_) => true,
+        Err(_) => false,
+    }
 }
