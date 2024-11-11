@@ -26,7 +26,7 @@ fn main() {
         .author("Arshia")
         .about("Tracks accounts and transactions")
         .subcommand(
-            Command::new("add-account")
+            Command::new("add-acc")
                 .about("Add a new account")
                 .arg(
                     Arg::new("name")
@@ -44,9 +44,9 @@ fn main() {
                         .help("Initial balance of the account"),
                 ),
         )
-        .subcommand(Command::new("list-accounts").about("List all accounts"))
+        .subcommand(Command::new("ls-acc").about("List all accounts"))
         .subcommand(
-            Command::new( "remove-account")
+            Command::new( "rm-acc")
             .about("Remove an account")
             .arg(
                 Arg::new("id")
@@ -58,7 +58,7 @@ fn main() {
             ),
             )
         .subcommand(
-            Command::new("add-transaction")
+            Command::new("add-trn")
                 .about("Add a new transaction")
                 .arg(
                     Arg::new("account-name")
@@ -100,9 +100,9 @@ fn main() {
                         .required(true),
                 ),
         )
-        .subcommand(Command::new("list-expenses").about("List all expenses"))
+        .subcommand(Command::new("ls-exp").about("List all expenses"))
         .subcommand(
-            Command::new("remove-expense")
+            Command::new("rm-exp")
             .about("Remove an expense")
             .arg(
                 Arg::new("id")
@@ -113,9 +113,9 @@ fn main() {
                 .required(true)
             )
         )
-        .subcommand(Command::new("list-incomes").about("List all incomes"))
+        .subcommand(Command::new("ls-inc").about("List all incomes"))
         .subcommand(
-            Command::new("remove-income")
+            Command::new("rm-inc")
             .about("Remove an income")
             .arg(
                 Arg::new("id")
@@ -131,7 +131,7 @@ fn main() {
     let conn = database_connection().expect("Failed to connect to database");
     
     match matches.subcommand() {
-        Some(("add-account", sub_m)) => {
+        Some(("add-acc", sub_m)) => {
             let name = sub_m.get_one::<String>("name").expect("name is required");
             let balance = sub_m.get_one::<String>("balance").unwrap_or(&"0".to_string()).parse::<f32>().unwrap();
             let account = Account {
@@ -141,14 +141,14 @@ fn main() {
             };
             let _ = add_account(&conn, account);
         }
-        Some(("list-accounts", _)) => {
+        Some(("ls-acc", _)) => {
             let _ = list_accounts(&conn);
         }
-        Some(("remove-account", sub_m)) => {
+        Some(("rm-acc", sub_m)) => {
             let id = sub_m.get_one::<String>("id").unwrap().parse::<i32>().unwrap();
             let _ = remove_account(&conn, id);
         }
-        Some(("add-transaction", sub_m)) => {
+        Some(("add-trn", sub_m)) => {
             let account_name = sub_m.get_one::<String>("account-name").expect("account-name is required");
             let amount = sub_m.get_one::<String>("amount").expect("amount is required").parse::<f32>().unwrap();
             let mut date = sub_m.get_one::<String>("date").map(|s| s.to_string());
@@ -175,17 +175,17 @@ fn main() {
                 println!("Invalid transaction type");
             }
         }
-        Some(("list-expenses", _)) => {
+        Some(("ls-exp", _)) => {
             let _ = list_expenses(&conn);
         }
-        Some(("remove-expense", sub_m)) => {
+        Some(("rm-exp", sub_m)) => {
             let id = sub_m.get_one::<String>("id").unwrap().parse::<i32>().unwrap();
             let _ = remove_expense(&conn, id);
         }
-        Some(("list-incomes", _)) => {
+        Some(("ls-inc", _)) => {
             let _ = list_incomes(&conn);
         }
-        Some(("remove-income", sub_m)) => {
+        Some(("rm-inc", sub_m)) => {
             let id = sub_m.get_one::<String>("id").unwrap().parse::<i32>().unwrap();
             let _ = remove_income(&conn, &id);
         }
